@@ -21,6 +21,9 @@ let config = {
     }
 };
 
+let balle
+let raquette 
+
 // Création de l'instance du jeu Phaser
 let game = new Phaser.Game(config);
 
@@ -30,18 +33,17 @@ function preload() {
     this.load.atlasXML('mon_sprite', 'assets/Breakout_Tile_Free.png', 'assets/Breakout_Tile_Free.xml');
 
     // Préchargement des fichiers audio
-this.load.audio('musique1', 'assets/musiques/BENNY BENASSI - Satisfaction [Original Video].mp3');
-this.load.audio('musique2', 'assets/musiques/Better Off Alone.mp3');
-this.load.audio('musique3', 'assets/musiques/Darude - Sandstorm.mp3');
-this.load.audio('musique4', 'assets/musiques/Eiffel 65 - Blue (Da Ba Dee).mp3');
-this.load.audio('musique5', 'assets/musiques/GALA - Freed from desire [Official Video].mp3');
-this.load.audio('musique6', 'assets/musiques/Haddaway - What Is Love [Official].mp3');
-this.load.audio('musique7', 'assets/musiques/Vengaboys - Boom, Boom, Boom, Boom!!.mp3');
-this.load.audio('musique8', 'assets/musiques/La Bouche - Be My Lover (Official Video).mp3');
-this.load.audio('musique9', 'assets/musiques/Stardust - Music Sounds Better With You (Official Music Video).mp3');
-this.load.audio('musique10', 'assets/musiques/Dragostea din tei.mp3');
-this.load.audio('musique11', 'assets/musiques/Nightcrawlers - Push The Feeling On (Official Video).mp3');
-
+    this.load.audio('musique1', 'assets/musiques/BENNY BENASSI - Satisfaction [Original Video].mp3');
+    this.load.audio('musique2', 'assets/musiques/Better Off Alone.mp3');
+    this.load.audio('musique3', 'assets/musiques/Darude - Sandstorm.mp3');
+    this.load.audio('musique4', 'assets/musiques/Eiffel 65 - Blue (Da Ba Dee).mp3');
+    this.load.audio('musique5', 'assets/musiques/GALA - Freed from desire [Official Video].mp3');
+    this.load.audio('musique6', 'assets/musiques/Haddaway - What Is Love [Official].mp3');
+    this.load.audio('musique7', 'assets/musiques/Vengaboys - Boom, Boom, Boom, Boom!!.mp3');
+    this.load.audio('musique8', 'assets/musiques/La Bouche - Be My Lover (Official Video).mp3');
+    this.load.audio('musique9', 'assets/musiques/Stardust - Music Sounds Better With You (Official Music Video).mp3');
+    this.load.audio('musique10', 'assets/musiques/Dragostea din tei.mp3');
+    this.load.audio('musique11', 'assets/musiques/Nightcrawlers - Push The Feeling On (Official Video).mp3');
 
 }
 
@@ -114,7 +116,7 @@ function create() {
         brique.setScale(echelle);
     }
 
-    let balle = this.physics.add.sprite(900, 700, 'mon_sprite', '58-Breakout-Tiles.png');
+    balle = this.physics.add.sprite(900, 700, 'mon_sprite', '58-Breakout-Tiles.png');
     balle.setScale(0.4);
 
     // Propriétés de la balle
@@ -122,13 +124,43 @@ function create() {
     balle.setBounce(1); // Rebondir sur les bords de l'écran
     balle.setCollideWorldBounds(true); // Collisions avec les bords de l'écran
 
-
-    let raquette = this.physics.add.sprite(900, 800, 'mon_sprite', '56-Breakout-Tiles.png');
+    // Crée la raquette
+    raquette = this.physics.add.sprite(900, 800, 'mon_sprite', '56-Breakout-Tiles.png');
     raquette.setScale(0.4);
+
+    // Crée les touches du clavier
+    cursors = this.input.keyboard.createCursorKeys()
     
 }
 
 // Fonction de mise à jour du jeu (boucle de jeu)
 function update() {
     // Logique du jeu, gestion des mouvements, des collisions, etc.
+    raquette.setVelocityX(0)
+
+    if(cursors.left.isDown){
+        raquette.setVelocityX(-500)
+    }
+
+    if(cursors.right.isDown){
+        raquette.setVelocityX(500)
+    }
+
+    // Bloque le mouvement vertical
+    raquette.setVelocityY(0);
+
+     // Gérer les collisions entre la balle et la raquette
+     this.physics.add.collider(balle, raquette, (balle, raquette) => {
+        // Calcule l'angle de rebond en fonction de la position de la balle par rapport à la raquette
+        let relativeX = balle.x - raquette.x;
+        let relativeY = balle.y - raquette.y;
+    
+        // Utilise Math.atan2 pour calculer l'angle de rebond
+        let bounceAngle = Math.atan2(relativeY, relativeX);
+    
+        let nouvelleVitesse = balle.body.speed;
+        balle.setVelocityY(-nouvelleVitesse * Math.sin(bounceAngle));
+        balle.setVelocityX(nouvelleVitesse * Math.cos(bounceAngle));
+    });
+
 }
